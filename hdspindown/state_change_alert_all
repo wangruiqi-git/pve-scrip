@@ -1,0 +1,20 @@
+#!/bin/bash
+#disks=`ls /dev|grep sd'[a-z]*$'`
+disks=`ls -l /dev/disk/by-id/|grep -v 'dm'|grep -v 'part'|grep -v 'SSD'|grep -v 'nvme'|grep -v 'wwn'|awk -F '/' 'NR>1{print $NF}'`
+
+WORKDIR=~/pve-script
+
+if [ ! -f $WORKDIR/bin/hd_state_change_alert ];then
+    cp $WORKDIR/hdspindown/hd_state_change_alert  $WORKDIR/bin/hd_state_change_alert
+fi
+
+
+uniq_disks=`echo ${disks} xxc`
+uniq_disks=`echo ${uniq_disks}|awk 'BEGIN{RS=" "; ORS=" "}{ if(a[$0] == 0){a[$0]+=1; print $0}}'`
+uniq_disks=`echo ${uniq_disks}|sed 's/xxc/ /'`
+
+for i in $uniq_disks;
+do
+    #echo $i
+    $WORKDIR/bin/hd_state_change_alert $i
+done

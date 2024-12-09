@@ -1,0 +1,51 @@
+#!/bin/sh
+
+# Usage: create a bash script that will call this script from github.
+# Example: curl -s https://raw.githubusercontent.com/The-OMG/rclone_tools/master/rclone_copy.sh | bash /dev/stdin httpremote: mygsuite:
+#
+  if [ -n "$1" ]; then
+     echo "$1"
+  else
+      echo "rclone_ sync aliyun .       will copy from dav to local"
+      echo "rclone_ sync aliyun upload. will copy from local to dav"
+      exit
+  fi
+
+  ACTION=$1
+  NAME=$2
+  DRIVER="/media/${NAME}"
+  REMOTE="dav-v4:/${NAME}"
+
+  WORKDIR="/root/pve-script/rclone-custm"
+
+  LOGFILE="${WORKDIR}/rclone_.log"
+  
+  if [ -n "$3" ]; then
+      echo "$3"
+      DRIVER="dav-v4:/${NAME}"
+      REMOTE="/media/${NAME}"
+  fi
+
+  rclone $1  "$REMOTE" "$DRIVER" \
+      --checkers=8 \
+      --contimeout=60s \
+      --drive-chunk-size=256M \
+      --drive-upload-cutoff=256M \
+      --fast-list \
+      --log-level=DEBUG \
+      --low-level-retries=10 \
+      --min-size=0 \
+      --no-check-certificate \
+      --retries=3 \
+      --retries=20 \
+      --stats-log-level=DEBUG \
+      --stats=10s \
+      --timeout=300s \
+      --tpslimit=6 \
+      --transfers=8 \
+      --log-file=$LOGFILE\
+      &
+
+  echo "view your log file with:"
+  echo "tail -f $LOGFILE"
+
